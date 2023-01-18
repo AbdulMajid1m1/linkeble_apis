@@ -12,13 +12,18 @@ app.use(cors({
     origin: '*'
 }));
 
+app.use(
+    fileUpload({
+        useTempFiles: true,
+    })
+);
 
+app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
         extended: true,
     })
 );
-app.use(bodyParser.json());
 app.get("/", (req, res) => {
     res.status(200).json({ success: true })
 })
