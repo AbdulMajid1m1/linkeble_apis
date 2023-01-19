@@ -9,6 +9,8 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const fileupload = require('express-fileupload');
+
 
 const createServiceStepOne = async (req, res) => {
     const value = Joi.object({
@@ -124,39 +126,86 @@ const createServiceStepFour = async (req, res) => {
     if (!IfServiceExit) {
         return res.status(400).json({ success: false, message: 'please complete previous step first' })
     }
-    const values = Joi.object({
-        //servicesImages array of string and max length should be 3
-        servicesImages: Joi.array().items(Joi.string()).max(3),
-        // servicesImages: Joi.array().items(Joi.string()).max(3),
-        serviceDocuments: Joi.array().items(Joi.string()).max(3),
-        // termsAndConditions boolean required and value should be true
-        termsAndConditions: Joi.boolean().required().valid(true),
+    // const values = Joi.object({
+    //     //servicesImages array of string and max length should be 3
+    //     servicesImages: Joi.array().items(Joi.string()).max(3),
+    //     // servicesImages: Joi.array().items(Joi.string()).max(3),
+    //     serviceDocuments: Joi.array().items(Joi.string()).max(3),
+    //     // termsAndConditions boolean required and value should be true
+    //     termsAndConditions: Joi.boolean().required().valid(true),
 
 
-    }).validate(req.body)
-    if (values.error) {
-        return res.status(400).json({ success: false, message: values.error.details[0].message })
-    }
+    // }).validate(req.body)
+    // if (values.error) {
+    //     return res.status(400).json({ success: false, message: values.error.details[0].message })
+    // }
     try {
-        // json format of req.body.servicesImages and req.body.serviceDocuments for postman
+        // req.files return array of objects when we upload multiple files and single object when we upload single file how to detect that
 
 
-        // uplaod images and documents coming from req.body to cloudinary
-        // "The \"path\" argument must be of type string. Received an instance of Array"
-        // upload arry of images and documents to cloudinary and get secure_url
+        // uplaod multiple images coming from frontend to cloudinary directly without saving them locally on server and then uploading them to cloudinary
+        const uploadImages = async (images) => {
+            const urls = []
+            if (Array.isArray(images)) {
 
-        const uploadImages = await cloudinary.uploader.upload(req.body.servicesImages[1], {
-            folder: 'servicesImages',
-        })
-        const uploadDocuments = await cloudinary.uploader.upload(req.body.serviceDocuments[1], {
-            folder: 'serviceDocuments',
-        })
-        
-        // json format of uploadImages and uploadDocuments for postman for above cludinary code
-        // add images and documents to req.body
-        req.body.servicesImages = uploadImages.secure_url
-        req.body.serviceDocuments = uploadDocuments.secure_url
-        // update service
+                for (const image of images) {
+                    try {
+
+
+                        const newPath = await cloudinary.uploader.upload(image.tempFilePath, { folder: 'ServiceImages' })
+                        urls.push(newPath.url)
+                    } catch (error) {
+                        return res.status(500).json({ success: false, message: error.message })
+
+                    }
+
+                }
+            }
+            else {
+                try {
+                    const newPath = await cloudinary.uploader.upload(images.tempFilePath, { folder: 'ServiceImages' })
+                    urls.push(newPath.url)
+                } catch (error) {
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+            }
+            return urls
+        }
+        const uploadDocuments = async (documents) => {
+            const urls = []
+            if (Array.isArray(documents)) {
+
+                for (const document of documents) {
+
+                    try {
+                        //  upload document to cloudinary in ServiceDocument folder and catch error if any
+                        const newPath = await cloudinary.uploader.upload(document.tempFilePath, { folder: 'ServiceDocuments' })
+                        urls.push(newPath.url)
+                    } catch (error) {
+                        return res.status(500).json({ success: false, message: error.message })
+                    }
+
+
+                }
+            }
+            else {
+                try {
+                    const newPath = await cloudinary.uploader.upload(documents.tempFilePath, { folder: 'ServiceDocuments' })
+                    urls.push(newPath.url)
+                } catch (error) {
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+                
+            }
+            return urls
+        }
+        const images = await uploadImages(req.files.servicesImages)
+        const documents = await uploadDocuments(req.files.serviceDocuments)
+        req.body.servicesImages = images
+        req.body.serviceDocuments = documents
+
+
+
         const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id }, {
             $set: req.body
         }, { new: true })

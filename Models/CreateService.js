@@ -46,6 +46,9 @@ const CreateServiceSchema = new mongoose.Schema(
         serviceStatus: { type: String, default: 'pending' },
 
         // comments and reviews
+        //  [{img:str,pid:str}]
+
+
 
     },
     { timestamps: true }
