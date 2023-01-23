@@ -38,8 +38,10 @@ const CreateServiceSchema = new mongoose.Schema(
         },
         questions: { type: [String], required: false },
         faqs: { type: [String], required: false },
-        servicesImages: { type: [String], required: false, maxlength: 3 },
-        serviceDocuments: { type: [String], required: false, maxlength: 3 },
+        // serviceData has to be an array of objects and each object will have image and imageId and default empty array
+        // servicesImages: { type: [String], default: [], maxlength: 3 },
+        servicesImages: { type: [Object], required: false, default: [], maxlength: 3 },
+        serviceDocuments: { type: [Object], required: false, default: [], maxlength: 3 },
         termsAndConditions: {
             type: Boolean,
         },

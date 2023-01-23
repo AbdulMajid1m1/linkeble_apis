@@ -25,7 +25,9 @@ app.use(
     })
 );
 app.get("/", (req, res) => {
-    res.status(200).json({ success: true })
+    // res.status(200).json({ success: true })
+  
+    res.sendFile(__dirname + '/home.html');
 })
 app.use('/', require('./Routes/RootRoute'))
 dbConnect()
