@@ -4,6 +4,7 @@ const OrderSchema = new mongoose.Schema({
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     talentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "CreateService" },
+    reviewId: { type: mongoose.Schema.Types.ObjectId, ref: "Review" },
     title: { type: String, required: true },
     details: { type: String, required: true },
     attachments: { type: [Object], required: false, default: [], maxlength: 5 },

@@ -6,8 +6,6 @@ const salt = bcrypt.genSaltSync(10);
 const mongoose = require('mongoose')
 const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
-
-
 const SignUp = async (req, res) => {
     const value = Joi.object({
         email: Joi.string().email().required(),

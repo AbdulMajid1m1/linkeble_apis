@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
         },
         location: {
             type: String,
-            default: "KPK Mansehra"
+            default: "Pakistan"
         },
         status: {
             type: String,

@@ -11,7 +11,6 @@ cloudinary.config({
 
 const fileupload = require('express-fileupload');
 
-
 const createServiceStepOne = async (req, res) => {
     const value = Joi.object({
         title: Joi.string().max(90).required(),
