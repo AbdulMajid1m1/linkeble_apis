@@ -6,4 +6,5 @@ const route = express.Router()
 route.get("/all-services", getAllServices)
 route.get("/search-services/:category", getSearchServices)
 
+
 module.exports = route

@@ -29,7 +29,11 @@ const UserSchema = new mongoose.Schema(
             type: String,
             default: 'client satisfiction is my main moto'
         },
-
+        chatlistId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Chatlist'
+        },
+        
     },
     { timestamps: true }
 )

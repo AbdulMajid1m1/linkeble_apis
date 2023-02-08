@@ -6,6 +6,7 @@ const salt = bcrypt.genSaltSync(10);
 const mongoose = require('mongoose')
 const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
+const Chatlist = require('../Models/Chatlist');
 const SignUp = async (req, res) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
@@ -23,18 +24,27 @@ const SignUp = async (req, res) => {
         }
 
         else {
+            // create a new chatlist for the user
+            const newChatList = new Chatlist({});
+            const chatList = await newChatList.save();
+            if (!chatList) {
+                return res.status(500).json({ success: false, error: 'Chatlist not created' })
+            }
 
             const hash = bcrypt.hashSync(password, salt);
             const newUser = new User({
                 email: email.toLowerCase(),
                 password: hash,
-                username
+                username,
+                chatlistId: chatList._id
             })
+
+
             const userTokenData = newUser;
             delete userTokenData.password;
 
             const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '30d' })
-            newUser.token = token;
+            // newUser.token = token;
             // console.log(userTokenData)
             const createdUser = await newUser.save()
             delete createdUser.password
