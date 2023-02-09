@@ -6,7 +6,7 @@ const salt = bcrypt.genSaltSync(10);
 const mongoose = require('mongoose')
 const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
-const Chatlist = require('../Models/Chatlist');
+const { Chatlist, GroupChatList } = require('../Models/Chatlist');
 const SignUp = async (req, res) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
@@ -27,8 +27,14 @@ const SignUp = async (req, res) => {
             // create a new chatlist for the user
             const newChatList = new Chatlist({});
             const chatList = await newChatList.save();
+            const newGropuChatList = new GroupChatList({});
+            const groupChatList = await newGropuChatList.save();
+
             if (!chatList) {
                 return res.status(500).json({ success: false, error: 'Chatlist not created' })
+            }
+            if (!groupChatList) {
+                return res.status(500).json({ success: false, error: 'GroupChatlist not created' })
             }
 
             const hash = bcrypt.hashSync(password, salt);
@@ -36,9 +42,9 @@ const SignUp = async (req, res) => {
                 email: email.toLowerCase(),
                 password: hash,
                 username,
-                chatlistId: chatList._id
+                chatlistId: chatList._id,
+                groupChatListId: groupChatList._id
             })
-
 
             const userTokenData = newUser;
             delete userTokenData.password;

@@ -1,7 +1,7 @@
-const Message = require("../../Models/Message")
 const Joi = require("joi")
 const { uploadDocuments } = require("../../Utils/cloudinaryImgFunctions")
 const File = require("../../Models/File")
+const { Message } = require("../../Models/Message")
 const sendMessage = async (req, res) => {
 
     const value = Joi.object({
@@ -12,15 +12,8 @@ const sendMessage = async (req, res) => {
         return res.status(400).json({ success: false, error: value.error.details[0].message })
     }
     try {
-
         // apply the logic to check if the user has sent the file with the message or not in the frontend genearte code accordingly
-
-
-
         // generate code to check if the user has sent the file with the message or not in the frontend
-
-
-
         const { to, message } = req.body
         if (!req.file) {
             const messageData = new Message({
@@ -105,6 +98,8 @@ const getMessages = async (req, res) => {
         return res.status(500).json({ success: false, error: err.message })
     }
 }
+
+
 
 module.exports = {
     sendMessage,

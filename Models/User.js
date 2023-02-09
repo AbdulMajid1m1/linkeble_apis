@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema(
     {
@@ -29,11 +30,19 @@ const UserSchema = new mongoose.Schema(
             type: String,
             default: 'client satisfiction is my main moto'
         },
+        // chatlistId references the Chatlist model. ChatList model is used to store the list of chats of a user.
         chatlistId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Chatlist'
+            ref: 'Chatlist',
+            required: true
         },
-        
+        // groupChatListId references the GroupChatList model. GroupChatList model is used to store the list of group chats of a user.
+        groupChatListId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'GroupChatList'
+        },
+
+
     },
     { timestamps: true }
 )

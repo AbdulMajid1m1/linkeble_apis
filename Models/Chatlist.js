@@ -12,4 +12,21 @@ const ChatlistSchema = new mongoose.Schema(
     },
     { timestamps: true }
 )
-module.exports = mongoose.model("Chatlist", ChatlistSchema)
+
+const GroupChatListSchema = new mongoose.Schema(
+    {
+        groupChatList: {
+            type: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'GroupChat'
+            }],
+            default: [],
+        }
+
+    },
+    { timestamps: true }
+)
+
+const GroupChatList = mongoose.model("GroupChatList", GroupChatListSchema)
+const Chatlist = mongoose.model("Chatlist", ChatlistSchema)
+module.exports = { Chatlist, GroupChatList }
