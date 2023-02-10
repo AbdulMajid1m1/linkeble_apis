@@ -6,7 +6,8 @@ const { createServiceStepOne, createServiceStepTwo,
     deleteServiceDocumentData,
     getAllTalentServices,
     deleteOneService,
-    updateServiceStepOne } = require('../Controllers/Talent/Talent')
+    updateServiceStepOne,
+} = require('../Controllers/Talent/Talent')
 const { auth } = require('../Middlewares/auth')
 const route = express.Router()
 

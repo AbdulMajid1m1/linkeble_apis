@@ -15,7 +15,7 @@ const sendMessage = async (req, res) => {
         // apply the logic to check if the user has sent the file with the message or not in the frontend genearte code accordingly
         // generate code to check if the user has sent the file with the message or not in the frontend
         const { to, message } = req.body
-        if (!req.file) {
+        if (!req.files) {
             const messageData = new Message({
                 receiver: to,
                 sender: req.payload._id,
@@ -29,9 +29,10 @@ const sendMessage = async (req, res) => {
                 return res.status(500).json({ success: false, message: "Message not sent" })
             }
         }
+
         else {
             // upload the file to the cloud and get the url of the files and save the url in the database
-            const docsUrl = await uploadDocuments(req.file.files, 'chatDocuments');
+            const docsUrl = await uploadDocuments(req.files.images, 'chatDocuments');
             if (docsUrl) {
 
                 const newFiles = new File({
@@ -47,7 +48,7 @@ const sendMessage = async (req, res) => {
                         receiver: to,
                         sender: req.payload._id,
                         message: message,
-                        files: savedFiles._id
+                        file: savedFiles._id
                     })
                     const savedMessage = await messageData.save()
                     if (savedMessage) {

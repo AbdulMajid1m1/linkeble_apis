@@ -17,16 +17,17 @@ app.use(
         useTempFiles: true,
     })
 );
-
 app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
         extended: true,
     })
 );
+
+
 app.get("/", (req, res) => {
     // res.status(200).json({ success: true })
-  
+
     res.sendFile(__dirname + '/home.html');
 })
 app.use('/', require('./Routes/RootRoute'))

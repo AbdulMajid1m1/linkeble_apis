@@ -1,7 +1,8 @@
 const Joi = require('joi')
 const { GroupChatList } = require('../../Models/Chatlist')
-const { GroupChat } = require('../../Models/Message')
+const { GroupChat, GroupMessage } = require('../../Models/Message')
 const User = require('../../Models/User')
+const { uploadDocuments } = require('../../Utils/cloudinaryImgFunctions')
 const createGroupChat = async (req, res) => {
     const value = Joi.object({
         name: Joi.string().required(),
@@ -66,4 +67,80 @@ const createGroupChat = async (req, res) => {
 }
 
 // TODO:  send message to the group chat
-module.exports = createGroupChat
+
+const sendGroupMessage = async (req, res) => {
+    const value = Joi.object({
+        message: Joi.string().required(),
+        groupChatId: Joi.string().required(),
+    }).validate(req.body)
+    if (value.error) {
+        return res.status(400).json({ success: false, error: value.error.details[0].message })
+    }
+    try {
+        const { message, groupChatId } = req.body
+        // get the group chat
+        if (!req.file) {
+            const groupMessage = new GroupMessage({
+                sender: req.payload._id,
+                groupChat: groupChatId,
+                message,
+            })
+            const savedGroupMessage = await groupMessage.save()
+            if (!savedGroupMessage) {
+                return res.status(500).json({ success: false, message: "Cannot save group message" })
+            }
+            const updateGroupChat = await GroupChat.updateOne(
+                { _id: groupChatId },
+                {
+                    $push: { messagesList: savedGroupMessage._id }
+                }
+            )
+            if (!updateGroupChat) {
+                return res.status(500).json({ success: false, message: "Cannot update group chat" })
+            }
+            return res.status(200).json({ success: true, message: "Message sent successfully" })
+        }
+        else {
+            const docsUrl = await uploadDocuments(req.file.files, 'chatDocuments');
+            if (!docsUrl) {
+                return res.status(500).json({ success: false, message: "Cannot upload documents" })
+            }
+
+            const MsgFiles = new File({
+                filesUrl: docsUrl,
+            })
+            const savedMsgFiles = await MsgFiles.save()
+            if (!savedMsgFiles) {
+                return res.status(500).json({ success: false, message: "Cannot save files" })
+            }
+            const groupMessage = new GroupMessage({
+                sender: req.payload._id,
+                groupChat: groupChatId,
+                message,
+                files: savedMsgFiles._id,
+            })
+            const savedGroupMessage = await groupMessage.save()
+            if (!savedGroupMessage) {
+                return res.status(500).json({ success: false, message: "Cannot save group message" })
+            }
+            const updateGroupChat = await GroupChat.updateOne(
+                { _id: groupChatId },
+                {
+                    $push: { messagesList: savedGroupMessage._id }
+                }
+            )
+            if (!updateGroupChat) {
+                return res.status(500).json({ success: false, message: "Cannot update group chat" })
+
+            }
+            return res.status(200).json({ success: true, message: "Message sent successfully" })
+        }
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ success: false, error: err.message })
+    }
+}
+
+module.exports = { createGroupChat, sendGroupMessage }
+
