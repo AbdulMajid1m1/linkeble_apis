@@ -24,11 +24,11 @@ const createServiceStepOne = async (req, res) => {
         return res.status(400).json({ success: false, message: value.error.details[0].message })
     }
     const { title, description, category, subcategory, serviceTags } = req.body;
-    const ifServiceExit = await CreateService.find({ user_id: req.payload._id })
+    const ifServiceExit = await CreateService.find({ user_id: req.payload.userData._id })
     console.log(ifServiceExit.length)
     if (ifServiceExit.length < 7) {
         const service = new CreateService({
-            user_id: req.payload._id,
+            user_id: req.payload.userData._id,
             title,
             description,
             category,
@@ -36,7 +36,7 @@ const createServiceStepOne = async (req, res) => {
             serviceTags
         })
 
-        console.log(req.payload._id)
+        console.log(req.payload.userData._id)
         try {
             data = await service.save()
             return res.status(200).json({ success: true, message: 'service created successfully', data: data })
@@ -46,9 +46,9 @@ const createServiceStepOne = async (req, res) => {
         }
     }
     else {
-        // const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id }, {
+        // const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id }, {
         //     $set: {
-        //         user_id: req.payload._id,
+        //         user_id: req.payload.userData._id,
         //         title,
         //         description,
         //         category,
@@ -57,7 +57,7 @@ const createServiceStepOne = async (req, res) => {
         //     }
 
         // }, { new: true })
-        // console.log(req.payload._id)
+        // console.log(req.payload.userData._id)
         // return res.status(200).json({ success: true, message: 'service updated successfully', data: service })
         res.status(400).json({ success: false, message: 'you can not create more than 7 services' })
     }
@@ -77,12 +77,12 @@ const updateServiceStepOne = async (req, res) => {
         return res.status(400).json({ success: false, message: value.error.details[0].message })
     }
     try {
-        const ifServiceExit = await CreateService.findOne({ user_id: req.payload._id, _id: req.params.serviceId })
+        const ifServiceExit = await CreateService.findOne({ user_id: req.payload.userData._id, _id: req.params.serviceId })
         if (!ifServiceExit) {
             return res.status(400).json({ success: false, message: 'service not found' })
         }
         const { title, description, category, subcategory, serviceTags } = req.body;
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
             $set: {
                 title,
                 description,
@@ -120,7 +120,7 @@ const createServiceStepTwo = async (req, res) => {
     if (values.error) {
         return res.status(400).json({ success: false, message: values.error.details[0].message })
     }
-    const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+    const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
         $set: {
             pricing: req.body
         },
@@ -141,7 +141,7 @@ const createServiceStepThree = async (req, res) => {
     try {
 
 
-        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
             $set: req.body
         }, { new: true })
         return res.status(200).json({ success: true, message: 'service updated successfully', data: updateService })
@@ -224,7 +224,7 @@ const createServiceStepFour = async (req, res) => {
         const images = await uploadImages(req.files.servicesImages)
 
         const documents = await uploadDocuments(req.files.serviceDocuments)
-        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
 
             //pushing images and documents to array of objects and seting terms and conditions to true
             $push: {
@@ -244,7 +244,7 @@ const createServiceStepFour = async (req, res) => {
 
 const deleteServiceGalleryData = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
             $pull: {
                 // pull images from array of objects where publicId is equal to req.body.publicId
                 servicesImages: { publicId: req.body.publicId }
@@ -266,7 +266,7 @@ const deleteServiceGalleryData = async (req, res) => {
 
 const deleteServiceDocumentData = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
             $pull: {
                 // pull documents from array of objects where publicId is equal to req.body.publicId
                 serviceDocuments: { publicId: req.body.publicId }
@@ -289,7 +289,7 @@ const deleteServiceDocumentData = async (req, res) => {
 
 const getAllTalentServices = async (req, res) => {
     try {
-        const services = await CreateService.find({ user_id: req.payload._id })
+        const services = await CreateService.find({ user_id: req.payload.userData._id })
         if (!services) {
             return res.status(400).json({ success: false, message: 'services not found' })
         }
@@ -301,7 +301,7 @@ const getAllTalentServices = async (req, res) => {
 
 const deleteOneService = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndDelete({ user_id: req.payload._id, _id: req.params.serviceId })
+        const service = await CreateService.findOneAndDelete({ user_id: req.payload.userData._id, _id: req.params.serviceId })
         if (!service) {
             return res.status(400).json({ success: false, message: 'service not found' })
         }

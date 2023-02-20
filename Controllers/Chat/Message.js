@@ -18,7 +18,7 @@ const sendMessage = async (req, res) => {
         if (!req.files) {
             const messageData = new Message({
                 receiver: to,
-                sender: req.payload._id,
+                sender: req.payload.userData._id,
                 message: message
             })
             const savedMessage = await messageData.save()
@@ -46,7 +46,7 @@ const sendMessage = async (req, res) => {
                 else {
                     const messageData = new Message({
                         receiver: to,
-                        sender: req.payload._id,
+                        sender: req.payload.userData._id,
                         message: message,
                         file: savedFiles._id
                     })
@@ -83,8 +83,8 @@ const getMessages = async (req, res) => {
         const { to } = req.query
         const messages = await Message.find({
             $or: [
-                { sender: req.payload._id, receiver: to },
-                { sender: to, receiver: req.payload._id }
+                { sender: req.payload.userData._id, receiver: to },
+                { sender: to, receiver: req.payload.userData._id }
             ]
         })
         if (messages) {

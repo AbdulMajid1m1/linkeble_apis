@@ -17,7 +17,7 @@ const payment = async (req, res) => {
     }
     const { cardNumber, cardHolderName, cardExpiryDate, cardCVV, paymentMethod, paymentAmount } = req.body
     const payment = new Payment({
-        userId: req.payload._id,
+        userId: req.payload.userData._id,
         cardNumber,
         cardHolderName,
         cardExpiryDate,

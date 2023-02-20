@@ -45,12 +45,12 @@ const SignUp = async (req, res) => {
                 chatlistId: chatList._id,
                 groupChatListId: groupChatList._id
             })
+            console.log(newUser)
 
             const userTokenData = newUser;
             delete userTokenData.password;
-
             const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '30d' })
-            // newUser.token = token;
+            newUser.token = token;
             // console.log(userTokenData)
             const createdUser = await newUser.save()
             delete createdUser.password

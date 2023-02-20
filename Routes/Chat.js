@@ -4,8 +4,6 @@ const { sendMessage, getMessages } = require('../Controllers/Chat/Message');
 const { auth } = require('../Middlewares/auth');
 // Middleware to handle file upload
 const router = require('express').Router();
-
-
 // TODO: test the routes
 router.post('/add-to-chatlist', auth, addToChatlist);
 router.get("/get-chatlist", auth, getChatlist);

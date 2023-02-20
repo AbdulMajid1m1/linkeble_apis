@@ -3,7 +3,7 @@ const Order = require("../../Models/Order");
 const getOneOrder = async (req, res) => {
     try {
         const order = await Order.findById({
-            _id: req.params.orderId, buyerId: req.payload._id
+            _id: req.params.orderId, buyerId: req.payload.userData._id
         }).populate('buyerId', 'username email').populate('talentId', 'username email').populate('serviceId', 'title category');
         res.status(200).json({ success: true, data: order })
     } catch (error) {
@@ -15,7 +15,7 @@ const getOneOrder = async (req, res) => {
 const getAllOrders = async (req, res) => {
 
     try {
-        const orders = await Order.find({ buyerId: req.payload._id }).populate('buyerId', 'username email').populate('talentId', 'username email').populate('serviceId', 'title category');
+        const orders = await Order.find({ buyerId: req.payload.userData._id }).populate('buyerId', 'username email').populate('talentId', 'username email').populate('serviceId', 'title category');
         res.status(200).json({ success: true, data: orders })
     }
     catch (error) {
@@ -29,7 +29,7 @@ const getAllOrders = async (req, res) => {
 const deleteOneOrder = async (req, res) => {
     try {
         const order = await Order.findByIdAndDelete({
-            _id: req.params.orderId, buyerId: req.payload._id
+            _id: req.params.orderId, buyerId: req.payload.userData._id
         });
         res.status(200).json({ success: true, data: order })
     } catch (error) {
@@ -41,7 +41,7 @@ const deleteOneOrder = async (req, res) => {
 const acceptOrder = async (req, res) => {
     try {
         const order = await Order.findByIdAndUpdate({
-            _id: req.params.orderId, buyerId: req.payload._id
+            _id: req.params.orderId, buyerId: req.payload.userData._id
         },
             { orderStatus: "completed" }
             , { new: true });

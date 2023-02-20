@@ -1,13 +1,15 @@
 const Joi = require('joi')
 const { GroupChatList } = require('../../Models/Chatlist')
+const mongoose = require('mongoose');
+
 const { GroupChat, GroupMessage } = require('../../Models/Message')
 const User = require('../../Models/User')
-const { uploadDocuments } = require('../../Utils/cloudinaryImgFunctions')
+const { uploadDocuments } = require('../../Utils/cloudinaryImgFunctions');
+const File = require('../../Models/File');
 const createGroupChat = async (req, res) => {
     const value = Joi.object({
         name: Joi.string().required(),
         members: Joi.array().items(Joi.string()).required(),
-
     }).validate(req.body)
     if (value.error) {
         return res.status(400).json({ success: false, error: value.error.details[0].message })
@@ -15,35 +17,34 @@ const createGroupChat = async (req, res) => {
     try {
         const { name, members } = req.body
         // create mongodb id for messagesList
-
-
         const messagesList = new mongoose.Types.ObjectId();
         const groupChat = new GroupChat({
             name,
             members,
-            admin: req.payload._id,
+            admin: req.payload.userData._id,
             messagesList,
         })
         const savedGroupChat = await groupChat.save()
         if (savedGroupChat) {
             // get the id of the group chat and save it in the members array of the group chat in the database
             const groupChatId = savedGroupChat._id
-
             // get the grup chat list of the members and push the group chat id in the group chat list of the members
             const getMembersGroupChatIds = await User.find({ _id: { $in: members } }, { groupChatListId: 1 })
             if (!getMembersGroupChatIds) {
                 return res.status(500).json({ success: false, message: "Cannot fetch users from members list" })
             }
 
+            const membersGroupChatIds = getMembersGroupChatIds.map((member) => member.groupChatListId)
+            console.log(membersGroupChatIds)
+
             // update the group chat list of the members
             const updateGroupChatList = await GroupChatList.updateMany(
                 {
-                    _id: { $in: getMembersGroupChatIds }
+                    _id: { $in: membersGroupChatIds }
                 },
                 {
                     $push: { groupChatList: groupChatId }
                 })
-
             if (!updateGroupChatList) {
                 return res.status(500).json({ success: false, message: "Cannot update group chat list" })
             }
@@ -55,7 +56,6 @@ const createGroupChat = async (req, res) => {
             if (!deleteGroupChat) {
                 return res.status(500).json({ success: false, message: "Group chat not deleted!" })
             }
-
             return res.status(500).json({ success: false, message: "Group chat not created" })
 
         }
@@ -80,8 +80,9 @@ const sendGroupMessage = async (req, res) => {
         const { message, groupChatId } = req.body
         // get the group chat
         if (!req.file) {
+          
             const groupMessage = new GroupMessage({
-                sender: req.payload._id,
+                sender: req.payload.userData._id,
                 groupChat: groupChatId,
                 message,
             })
@@ -114,7 +115,7 @@ const sendGroupMessage = async (req, res) => {
                 return res.status(500).json({ success: false, message: "Cannot save files" })
             }
             const groupMessage = new GroupMessage({
-                sender: req.payload._id,
+                sender: req.payload.userData._id,
                 groupChat: groupChatId,
                 message,
                 files: savedMsgFiles._id,

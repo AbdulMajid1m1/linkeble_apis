@@ -50,7 +50,7 @@ const placeOrder = async (req, res) => {
     let paymentId = mongoose.Types.ObjectId(req.body.paymentId)
 
     const order = new Order({
-        buyerId: req.payload._id,
+        buyerId: req.payload.userData._id,
         talentId,
         serviceId,
         paymentId,

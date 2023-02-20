@@ -4,10 +4,8 @@ const { Message } = require("../../Models/Message");
 const User = require("../../Models/User");
 const addToChatlist = async (req, res) => {
     // get user id from payload and chat id from payload
-    const userId = req.payload._id;
+    const userId = req.payload.userData._id;
     const chatId = req.payload.chatlistId;
-
-
     const value = Joi.object({
         chatWith: Joi.string().required()
     }).validate(req.body)
@@ -97,8 +95,8 @@ const getChatlist = async (req, res) => {
 
             const lastMessage = await Message.find(
                 {
-                    $or: [{ senderId: req.payload._id, receiverId: user._id },
-                    { senderId: user._id, receiverId: req.payload._id }]
+                    $or: [{ senderId: req.payload.userData._id, receiverId: user._id },
+                    { senderId: user._id, receiverId: req.payload.userData._id }]
                 }).sort({ createdAt: -1 }).limit(1);
 
             user.lastMessage = lastMessage;
@@ -108,38 +106,28 @@ const getChatlist = async (req, res) => {
         const sortedChatList = ChatListWithLastMsg.sort((a, b) => {
             return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
         });
-
         const groupChatListWithLastMsg = groupChatlist.map(async group => {
             //    // get the last message of the chat of the user with other user using the chat id based on time and date of the message
-
             const lastMessage = await Message.find(
                 {
                     groupChat: group._id
                 }
             ).sort({ createdAt: -1 }).limit(1);
-
             group.lastMessage = lastMessage;
             return group;
         });
-
-
         // sort the chatlist by the date and time of the last message
         const sortedGroupChatList = groupChatListWithLastMsg.sort((a, b) => {
             return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
         });
-
         // TODO: return the sorted chatlist and group chatlist with the last message of each chat together
-
         return res.status(200).json({ message: "Chatlist", data: { chatlist: sortedChatList, groupChatlist: sortedGroupChatList } });
-
     }
     catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 }
-
-
 
 module.exports = {
     addToChatlist,

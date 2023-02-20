@@ -59,7 +59,7 @@ const PostReview = async (req, res) => {
                     Recommend,
                     serviceId: orderData.serviceId,
                     orderId: orderData._id,
-                    createdBy: req.payload._id,
+                    createdBy: req.payload.userData._id,
                     createdFor: req.body.createdForType === 'buyer' ?
                         orderData.buyerId : req.body.createdForType === 'talent' ?
                             orderData.talentId : null,
@@ -119,7 +119,7 @@ const deleteReview = async (req, res) => {
 
     try {
 
-        const deleteReview = await Review.findOneAndDelete({ orderId: req.params.orderId, createdBy: req.payload._id })
+        const deleteReview = await Review.findOneAndDelete({ orderId: req.params.orderId, createdBy: req.payload.userData._id })
         if (deleteReview) {
             //mongoose update query to delete reviewId from order
             const orderUpdate = await Order.findByIdAndUpdate(req.params.orderId, { $unset: { reviewId: "" } }, { new: true });
