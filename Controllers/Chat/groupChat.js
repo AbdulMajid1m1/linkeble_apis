@@ -80,7 +80,7 @@ const sendGroupMessage = async (req, res) => {
         const { message, groupChatId } = req.body
         // get the group chat
         if (!req.file) {
-          
+
             const groupMessage = new GroupMessage({
                 sender: req.payload.userData._id,
                 groupChat: groupChatId,
@@ -143,5 +143,81 @@ const sendGroupMessage = async (req, res) => {
     }
 }
 
-module.exports = { createGroupChat, sendGroupMessage }
+const getGroupChat = async (req, res) => {
+    const value = Joi.object({
+        groupChatId: Joi.string().required(),
+    }).validate(req.body)
+    if (value.error) {
+        return res.status(400).json({ success: false, error: value.error.details[0].message })
+    }
+    try {
+        const { groupChatId } = req.body
+        const groupChat = await GroupChat.findOne({ _id: groupChatId })
+        if (!groupChat) {
+            return res.status(500).json({ success: false, message: "Cannot fetch group chat" })
+        }
+        const fetchGroupMessages = await GroupMessage.find({ _id: { $in: groupChat.messagesList } })
+        if (!fetchGroupMessages) {
+            return res.status(500).json({ success: false, message: "Cannot fetch group messages" })
+        }
+        return res.status(200).json({ success: true, message: "Group chat fetched successfully", groupChat, fetchGroupMessages })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ success: false, error: err.message })
+    }
+}
+
+const deleteGroupFromUserGroupChatList = async (req, res) => {
+    const value = Joi.object({
+        groupChatId: Joi.string().required(),
+    }).validate(req.body)
+    if (value.error) {
+        return res.status(400).json({ success: false, error: value.error.details[0].message })
+    }
+    try {
+        const { groupChatId } = req.body
+        //  remove the group chat id from the group chat list of the current member
+        const updateGroupChatList = await GroupChatList.updateOne(
+            { _id: req.payload.userData.groupChatListId },
+            { $pull: { groupChatList: groupChatId } },
+            { new: true }
+        )
+        if (!updateGroupChatList) {
+            return res.status(500).json({ success: false, message: "Cannot update group chat list" })
+        }
+        // find the group chat id in the group chat list of the other all users
+
+
+        const groupChatInGroupChatListCount = await GroupChatList.find({ $in: { groupChatList: groupChatId } }).countDocuments();
+        if (!groupChatInGroupChatListCount) {
+            return res.status(500).json({ success: false, message: "Cannot find group chat in group chat list" })
+        }
+        //  if the group chat id is not found in the group chat list of the other all users then delete the group chat
+        if (groupChatInGroupChatListCount === 1) {
+            const deleteGroupChat = await GroupChat.deleteOne({ _id: groupChatId })
+            if (!deleteGroupChat) {
+                return res.status(500).json({ success: false, message: "Cannot delete group chat" })
+            }
+            // delete the group messages 
+            const deleteGroupMessages = await GroupMessage.deleteMany({ groupChat: groupChatId })
+            if (!deleteGroupMessages) {
+                return res.status(500).json({ success: false, message: "Cannot delete group messages" })
+            }
+            return res.status(200).json({ success: true, message: "Group chat deleted successfully" })
+        }
+        // if the group chat id is found in the group chat list of the other all users then just delete the group chat id from the group chat list of the current user
+        else {
+            return res.status(200).json({ success: true, message: "Group chat deleted successfully" })
+        }
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ success: false, error: err.message })
+    }
+}
+
+
+
+module.exports = { createGroupChat, sendGroupMessage, getGroupChat, deleteGroupFromUserGroupChatList }
 

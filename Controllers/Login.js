@@ -7,20 +7,22 @@ const mongoose = require('mongoose')
 const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
 const { Chatlist, GroupChatList } = require('../Models/Chatlist');
-const SignUp = async (req, res) => {
+const createError = require('../Utils/createError');
+
+const SignUp = async (req, res, next) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().min(3).required(),
         username: Joi.string().required()
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).json({ error: value.error.details[0].message })
+        next(createError(400, value.error.details[0].message))
     }
     try {
         const { email, password, username } = req.body
         const user = await User.findOne({ email })
         if (user) {
-            return res.status(400).json({ success: false, error: 'Email already exists' })
+            next(createError(400, "Email already exists"))
         }
 
         else {
@@ -31,10 +33,10 @@ const SignUp = async (req, res) => {
             const groupChatList = await newGropuChatList.save();
 
             if (!chatList) {
-                return res.status(500).json({ success: false, error: 'Chatlist not created' })
+                next(createError(500, "Chatlist not created"))
             }
             if (!groupChatList) {
-                return res.status(500).json({ success: false, error: 'GroupChatlist not created' })
+                next(createError(500, "Group chatlist not created"))
             }
 
             const hash = bcrypt.hashSync(password, salt);
@@ -62,19 +64,18 @@ const SignUp = async (req, res) => {
 
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        next(err)
     }
 }
 
 
-const SignIn = async (req, res) => {
+const SignIn = async (req, res, next) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().min(3).required()
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).json({ error: value.error.details[0].message })
-
+        next(createError(400, value.error.details[0].message))
     }
     try {
         const { email, password } = req.body
@@ -93,26 +94,28 @@ const SignIn = async (req, res) => {
                 })
             }
             else {
-                res.status(400).json({ success: false, message: "Wrong credentials!" })
+                next(createError(400, "Wrong credentials!"))
             }
 
         }
         else {
-            res.status(400).json({ success: false, message: "Wrong credentials!" })
+            next(createError(400, "Wrong credentials!"))
         }
 
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        next(err);
+
     }
 }
 
-const forgetPasswordStepOne = async (req, res) => {
+const forgetPasswordStepOne = async (req, res, next) => {
     const value = Joi.object({
         email: Joi.string().email().required()
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).json({ success: false, error: value.error.details[0].message })
+        // return res.status(400).json({ success: false, error: value.error.details[0].message })
+        next(createError(400, value.error.details[0].message))
     }
 
     try {
@@ -129,23 +132,23 @@ const forgetPasswordStepOne = async (req, res) => {
             return res.status(200).json({ success: true, message: "OTP sent to your email", token })
         }
         else {
-            return res.status(400).json({ success: false, message: "Email not found!" })
+            next(createError(400, "Email not found!"))
         }
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        next(err)
     }
 
 }
 
-const forgetPasswordStepTwo = async (req, res) => {
+const forgetPasswordStepTwo = async (req, res, next) => {
     // save token in local storag or any other way and send it in body
     const value = Joi.object({
         token: Joi.string(),
         otp: Joi.number().required()
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).json({ success: false, error: value.error.details[0].message })
+        next(createError(400, value.error.details[0].message))
     }
 
     try {
@@ -158,24 +161,24 @@ const forgetPasswordStepTwo = async (req, res) => {
             return res.status(200).json({ success: true, message: "OTP verified" })
         }
         else {
-            return res.status(400).json({ success: false, message: "Wrong OTP" })
+            next(createError(400, "Wrong OTP"))
         }
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        next(err)
     }
 
 }
 
 
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
     const value = Joi.object({
         token: Joi.string(),
         password: Joi.string().min(3).required(),
         confirmpassword: Joi.string().min(3).required(),
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).json({ success: false, error: value.error.details[0].message })
+        next(createError(400, value.error.details[0].message))
     }
 
     try {
@@ -189,17 +192,15 @@ const resetPassword = async (req, res) => {
             return res.status(200).json({ success: true, message: "Password reset successfully" })
         }
         else {
-            return res.status(400).json({ success: false, message: "User not found" })
+            next(createError(400, "User not found"))
         }
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        next(err)
     }
 
 
 }
-
-
 
 module.exports = {
     SignUp,

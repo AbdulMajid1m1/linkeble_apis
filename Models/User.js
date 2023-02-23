@@ -42,6 +42,14 @@ const UserSchema = new mongoose.Schema(
             ref: 'GroupChatList'
         },
 
+        favouriteGigs: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'CreateService',
+                default: []
+            }
+        ],
+
 
     },
     { timestamps: true }

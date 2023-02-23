@@ -1,4 +1,5 @@
-const CreateService = require("../../Models/CreateService")
+const CreateService = require("../../Models/CreateService");
+const User = require("../../Models/User");
 
 
 const getAllServices = async (req, res) => {
@@ -23,6 +24,24 @@ const getSearchServices = async (req, res) => {
     }
 }
 
+const searchUserServices = async (req, res) => {
+    try {
+        //  find all users which contains the given string in their name
+        const searchQuery = req.query.name;
+        const users = await User.find({ name: { $regex: searchQuery, $options: 'i' } });
+        if (users.length === 0) {
+            return res.status(200).json({ success: true, message: "No user found" })
+        }
+        res.status(200).json({ success: true, users })
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message })
+
+    }
+}
 
 
-module.exports = { getAllServices, getSearchServices }
+
+
+
+
+module.exports = { getAllServices, getSearchServices, searchUserServices }

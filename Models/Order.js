@@ -15,10 +15,12 @@ const OrderSchema = new mongoose.Schema({
     orderStatus: { type: String, default: "active" },
     package: { type: String, required: true },
     isAccepted: { type: Boolean, default: false },
+    isCompleted: { type: Boolean, default: false },
     TermsAndContitions: { type: Boolean, required: true },
     paymentId: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
 }, { timestamps: true })
 
+// TODO: Add a method to check if the order is completed or not in the backend
 //TODO: Add a method to check if the order is accepted or not
 
 

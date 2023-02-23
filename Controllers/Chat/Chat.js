@@ -5,7 +5,7 @@ const User = require("../../Models/User");
 const addToChatlist = async (req, res) => {
     // get user id from payload and chat id from payload
     const userId = req.payload.userData._id;
-    const chatId = req.payload.chatlistId;
+    const chatId = req.payload.userData.chatlistId;
     const value = Joi.object({
         chatWith: Joi.string().required()
     }).validate(req.body)
@@ -56,7 +56,7 @@ const addToChatlist = async (req, res) => {
 
 const deleteFromChatlist = async (req, res) => {
 
-    const chatId = req.payload.chatlistId;
+    const chatId = req.payload.userData.chatlistId;
     const { chatWith } = req.body;
     try {
         const deleteChatWith = await Chatlist.findByIdAndUpdate(chatId, { $pull: { usersList: chatWith } }, { new: true });
@@ -80,12 +80,12 @@ const getChatlist = async (req, res) => {
 
         // const chatlist = await Chatlist.findById(req.payload.chatlistId).populate('chatlistId');
         // we only new name and profile pic of the user
-        const chatlist = await Chatlist.findById(req.payload.chatlistId).populate('usersList');
+        const chatlist = await Chatlist.findById(req.payload.userData.chatlistId).populate('usersList');
         if (!chatlist) {
             return res.status(400).json({ message: "Chatlist not found" });
         }
         // group chatlist will contain the group chat id and the name of the group and the profile pic of the group and members of the group
-        const groupChatlist = await GroupChatList.findById(req.payload.groupChatlistId).populate('groupChatlistId');
+        const groupChatlist = await GroupChatList.findById(req.payload.userData.groupChatlistId).populate('groupChatlistId');
 
         if (!groupChatlist) {
             return res.status(400).json({ message: "Group chatlist not found" });

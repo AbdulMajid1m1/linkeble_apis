@@ -24,6 +24,7 @@ const payment = async (req, res) => {
         cardCVV,
         paymentMethod,
         paymentAmount,
+        
 
     })
     try {

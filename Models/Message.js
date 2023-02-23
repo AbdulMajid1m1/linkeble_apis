@@ -21,19 +21,11 @@ const MessageSchema = new mongoose.Schema(
             default: null
         },
 
-        // isRead: {
-        //     type: Boolean,
-        //     default: false
-        // },
-        // isDeleted: {
-        //     type: Boolean,
-        //     default: false
-        // },
-
     },
     { timestamps: true }
 
 )
+
 
 const GroupChatSchema = new mongoose.Schema(
     {
@@ -101,9 +93,67 @@ const GrupMessageSchema = new mongoose.Schema(
 )
 
 
+const OfferSchema = new mongoose.Schema(
+    {
+        sender: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        receiver: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        serviceId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'CreateService',
+            required: true
+        },
+        description: {
+            type: String,
+        },
+        price: {
+            type: Number,
+            required: true
+        },
+        revision: {
+            type: Number,
+            required: true
+        },
+        deliveryTime: {
+            type: Date,
+            required: true
+        },
+        offerExpireIn: {
+            type: Date,
 
+        },
+        isAccepted: {
+            type: Boolean,
+            default: false
+        },
+        modificationRequest: {
+            type: Boolean,
+            default: false
+        },
+        paymentMethod: {
+            type: String,
+            required: true
+        },
+
+
+    },
+    { timestamps: true }
+)
+
+
+
+
+
+const Offer = mongoose.model('Offer', OfferSchema);
 const Message = mongoose.model('Message', MessageSchema);
 const GroupMessage = mongoose.model('GroupMessage', GrupMessageSchema);
 const GroupChat = mongoose.model('GroupChat', GroupChatSchema);
 
-module.exports = { Message, GroupMessage, GroupChat };
+module.exports = { Message, GroupMessage, GroupChat, Offer };
