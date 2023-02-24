@@ -10,7 +10,6 @@ module.exports = {
                         if (!err) {
                             req.payload = data
                             req.token = token
-
                             next()
                         } else {
                             return res.status(403).json({ success: false, message: 'Token is not valid!', err })

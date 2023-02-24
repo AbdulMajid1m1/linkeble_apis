@@ -51,14 +51,16 @@ const SignUp = async (req, res, next) => {
 
             const userTokenData = newUser;
             delete userTokenData.password;
-            const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '30d' })
-            newUser.token = token;
+            const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '1m' })
+            // newUser.token = token;
             // console.log(userTokenData)
             const createdUser = await newUser.save()
             delete createdUser.password
             // const token = jwt.sign({ id: createdUser._id }, jwtKey, { expiresIn: '1d' })
 
-            return res.status(200).json({ success: true, userData: createdUser, token: token })
+            return res.cookie("accessToken", token, {
+                httpOnly: true,
+            }).status(200).json({ success: true, userData: createdUser, token: token })
 
         }
 
@@ -87,8 +89,10 @@ const SignIn = async (req, res, next) => {
             if (isPasswordCorrect) {
                 const userData = user.toObject();
                 delete userData.password;
-                const token = jwt.sign(userData, jwtKey, { expiresIn: '30d' })
-                res.status(200).json({
+                const token = jwt.sign(userData, jwtKey, { expiresIn: '1m' })
+                res.cookie("accessToken", token, {
+                    httpOnly: true,
+                }).status(200).json({
                     success: true, message: "Login Successful",
                     token
                 })
@@ -202,10 +206,25 @@ const resetPassword = async (req, res, next) => {
 
 }
 
+const logout = async (req, res, next) => {
+    res
+        .clearCookie("accessToken", {
+            sameSite: "none",
+            secure: true,
+        })
+        .status(200)
+        .send("User has been logged out.");
+};
+
+
+
+
+
 module.exports = {
     SignUp,
     SignIn,
     forgetPasswordStepOne,
     forgetPasswordStepTwo,
-    resetPassword
+    resetPassword,
+    logout
 }

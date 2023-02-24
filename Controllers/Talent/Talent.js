@@ -36,7 +36,10 @@ const createServiceStepOne = async (req, res) => {
             serviceTags
         })
 
-        console.log(req.payload.userData._id)
+        console.log(req.payload)
+        console.log(req.payload.userData)
+        console.log(req.now)
+        console.log(req.tokenExp)
         try {
             data = await service.save()
             return res.status(200).json({ success: true, message: 'service created successfully', data: data })
@@ -92,6 +95,8 @@ const updateServiceStepOne = async (req, res) => {
             }
 
         }, { new: true })
+
+
 
         return res.status(200).json({ success: true, message: 'service updated successfully', data: service })
     } catch (error) {
