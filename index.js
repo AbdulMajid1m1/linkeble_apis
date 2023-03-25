@@ -1,5 +1,10 @@
+
 const express = require('express')
 const app = express()
+
+
+
+
 // error handling middleware 
 const PORT = process.env.PORT || 5000
 require('dotenv').config()
@@ -11,7 +16,6 @@ const dbConnect = require('./Config/mongo')
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
-
 
 app.use(
     fileUpload({

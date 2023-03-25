@@ -24,7 +24,10 @@ const SignUp = async (req, res, next) => {
         if (user) {
             next(createError(400, "Email already exists"))
         }
-
+        const findUsername = await User.findOne({ username })
+        if (findUsername) {
+            next(createError(400, "Username already exists"))
+        }
         else {
             // create a new chatlist for the user
             const newChatList = new Chatlist({});
@@ -51,13 +54,11 @@ const SignUp = async (req, res, next) => {
 
             const userTokenData = newUser;
             delete userTokenData.password;
-            const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '1m' })
+            const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '30d' })
             // newUser.token = token;
             // console.log(userTokenData)
             const createdUser = await newUser.save()
             delete createdUser.password
-            // const token = jwt.sign({ id: createdUser._id }, jwtKey, { expiresIn: '1d' })
-
             return res.cookie("accessToken", token, {
                 httpOnly: true,
             }).status(200).json({ success: true, userData: createdUser, token: token })
@@ -89,13 +90,14 @@ const SignIn = async (req, res, next) => {
             if (isPasswordCorrect) {
                 const userData = user.toObject();
                 delete userData.password;
-                const token = jwt.sign(userData, jwtKey, { expiresIn: '1m' })
+                const token = jwt.sign(userData, jwtKey, { expiresIn: '30d' })
                 res.cookie("accessToken", token, {
                     httpOnly: true,
                 }).status(200).json({
                     success: true, message: "Login Successful",
+                    userData: user,
                     token
-                })
+                }) 
             }
             else {
                 next(createError(400, "Wrong credentials!"))
@@ -130,7 +132,7 @@ const forgetPasswordStepOne = async (req, res, next) => {
             const token = jwt.sign({
                 id: user._id,
                 otp
-            }, jwtKey, { expiresIn: '30m' })
+            }, jwtKey, { expiresIn: '30d' })
 
             await sendOTPEmail(req.body.email, otp)
             return res.status(200).json({ success: true, message: "OTP sent to your email", token })
@@ -228,3 +230,5 @@ module.exports = {
     resetPassword,
     logout
 }
+
+

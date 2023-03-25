@@ -10,8 +10,8 @@ const placeOrder = async (req, res) => {
         // attachments: Joi.alternatives().try(Joi.array().max(5), Joi.object()),
         attachments: Joi.any(),
         // FIXME: Reminder there is no option for selecting category and subcategory while placing order so they should come from the service
-        category: Joi.string().required(),
-        subcategory: Joi.string().required(),
+        // category: Joi.string().required(),
+        // subcategory: Joi.string().required(),
         // FIXME: Reminder DeliveryTime should be a date coming from the service package delivery time and not from the user input as there is no option for selecting delivery time while placing order
         DeliveryTime: Joi.date().required(),
         budget: Joi.number().required(),

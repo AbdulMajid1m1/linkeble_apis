@@ -24,11 +24,11 @@ const createServiceStepOne = async (req, res) => {
         return res.status(400).json({ success: false, message: value.error.details[0].message })
     }
     const { title, description, category, subcategory, serviceTags } = req.body;
-    const ifServiceExit = await CreateService.find({ user_id: req.payload.userData._id })
+    const ifServiceExit = await CreateService.find({ user_id: req.payload._id })
     console.log(ifServiceExit.length)
     if (ifServiceExit.length < 7) {
         const service = new CreateService({
-            user_id: req.payload.userData._id,
+            user_id: req.payload._id,
             title,
             description,
             category,
@@ -37,9 +37,7 @@ const createServiceStepOne = async (req, res) => {
         })
 
         console.log(req.payload)
-        console.log(req.payload.userData)
-        console.log(req.now)
-        console.log(req.tokenExp)
+        console.log(req.payload)
         try {
             data = await service.save()
             return res.status(200).json({ success: true, message: 'service created successfully', data: data })
@@ -80,12 +78,12 @@ const updateServiceStepOne = async (req, res) => {
         return res.status(400).json({ success: false, message: value.error.details[0].message })
     }
     try {
-        const ifServiceExit = await CreateService.findOne({ user_id: req.payload.userData._id, _id: req.params.serviceId })
+        const ifServiceExit = await CreateService.findOne({ user_id: req.payload._id, _id: req.params.serviceId })
         if (!ifServiceExit) {
             return res.status(400).json({ success: false, message: 'service not found' })
         }
         const { title, description, category, subcategory, serviceTags } = req.body;
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
             $set: {
                 title,
                 description,
@@ -117,6 +115,7 @@ const createServiceStepTwo = async (req, res) => {
         price: Joi.number().required(),
     })
 
+
     const values = Joi.object({
         basic: InnerValues,
         standard: InnerValues,
@@ -125,12 +124,23 @@ const createServiceStepTwo = async (req, res) => {
     if (values.error) {
         return res.status(400).json({ success: false, message: values.error.details[0].message })
     }
-    const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
-        $set: {
-            pricing: req.body
-        },
-    }, { new: true })
-    return res.status(200).json({ success: true, message: 'service updated successfully', data: updateService })
+    console.log(req.payload._id)
+    console.log(req.params.serviceId)
+    try {
+        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
+            $set: {
+                pricing: req.body
+            },
+        }, { new: true })
+        if (!updateService) {
+            return res.status(400).json({ success: false, message: 'service not found' })
+        }
+
+        return res.status(200).json({ success: true, message: 'service updated successfully', data: updateService })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ success: false, message: error.message })
+    }
 
 }
 
@@ -146,7 +156,7 @@ const createServiceStepThree = async (req, res) => {
     try {
 
 
-        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
+        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
             $set: req.body
         }, { new: true })
         return res.status(200).json({ success: true, message: 'service updated successfully', data: updateService })
@@ -162,8 +172,8 @@ const createServiceStepFour = async (req, res) => {
     const values = Joi.object({
         // req.files.serviceImages is array of objects or just object and we are validating it to have not more than 3 images
 
-        servicesImages: Joi.alternatives().try(Joi.array().max(2), Joi.object()).required(),
-        serviceDocuments: Joi.alternatives().try(Joi.array().max(2), Joi.object()).required()
+        servicesImages: Joi.alternatives().try(Joi.array().max(3), Joi.object()).required(),
+        serviceDocuments: Joi.alternatives().try(Joi.array().max(3), Joi.object())
 
     }).validate(req.files)
     if (values.error) {
@@ -178,23 +188,21 @@ const createServiceStepFour = async (req, res) => {
 
                 for (const image of images) {
                     try {
-
-                        const newPath = await cloudinary.uploader.upload(image.tempFilePath, { folder: 'ServiceImages' })
+                        const newPath = await cloudinary.uploader.upload(image?.tempFilePath, { folder: 'ServiceImages' })
                         // urls.push(newPath.url)
                         urls.push({ imgUrl: newPath.secure_url, publicId: newPath.public_id })
                     } catch (error) {
-                        return res.status(500).json({ success: false, message: error.message })
-
+                        throw new Error(error.message);
                     }
 
                 }
             }
             else {
                 try {
-                    const newPath = await cloudinary.uploader.upload(images.tempFilePath, { folder: 'ServiceImages' })
+                    const newPath = await cloudinary.uploader.upload(images?.tempFilePath, { folder: 'ServiceImages' })
                     urls.push({ imgUrl: newPath.secure_url, publicId: newPath.public_id })
                 } catch (error) {
-                    return res.status(500).json({ success: false, message: error.message })
+                    throw new Error(error.message);
                 }
             }
 
@@ -207,41 +215,51 @@ const createServiceStepFour = async (req, res) => {
                 for (const document of documents) {
 
                     try {
-                        const newPath = await cloudinary.uploader.upload(document.tempFilePath, { folder: 'ServiceDocuments' })
+                        const newPath = await cloudinary.uploader.upload(document?.tempFilePath, { folder: 'ServiceDocuments' })
                         urls.push({ imgUrl: newPath.secure_url, publicId: newPath.public_id })
                     } catch (error) {
-                        return res.status(500).json({ success: false, message: error.message })
+                        throw new Error(error.message);
                     }
                 }
             }
             else {
                 try {
-                    const newPath = await cloudinary.uploader.upload(documents.tempFilePath, { folder: 'ServiceDocuments' })
+                    const newPath = await cloudinary.uploader.upload(documents?.tempFilePath, { folder: 'ServiceDocuments' })
                     urls.push({ imgUrl: newPath.secure_url, publicId: newPath.public_id })
                 } catch (error) {
-                    return res.status(500).json({ success: false, message: error.message })
+                    throw new Error(error.message);
                 }
 
             }
             return urls
         }
 
+
+
         const images = await uploadImages(req.files.servicesImages)
-
         const documents = await uploadDocuments(req.files.serviceDocuments)
-        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
 
+        const updateService = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
             //pushing images and documents to array of objects and seting terms and conditions to true
             $push: {
-                servicesImages: { $each: images },
-                serviceDocuments: { $each: documents }
+                servicesImages:
+                    images.length > 0 ? { $each: images } :
+                        {}, serviceDocuments: documents.length > 0
+                            ? { $each: documents } : {}
             },
-            termsAndConditions: req.body.termsAndConditions
+            // termsAndConditions: req.body.termsAndConditions
+            termsAndConditions: true
         }
             , { new: true })
+
+        if (!updateService) {
+            return res.status(400).json({ success: false, message: 'service not found' })
+        }
+
         return res.status(200).json({ success: true, message: 'service updated successfully', data: updateService })
         // res.send("uploaaded")
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ success: false, message: error.message })
     }
 
@@ -249,7 +267,7 @@ const createServiceStepFour = async (req, res) => {
 
 const deleteServiceGalleryData = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
             $pull: {
                 // pull images from array of objects where publicId is equal to req.body.publicId
                 servicesImages: { publicId: req.body.publicId }
@@ -271,7 +289,8 @@ const deleteServiceGalleryData = async (req, res) => {
 
 const deleteServiceDocumentData = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndUpdate({ user_id: req.payload.userData._id, _id: req.params.serviceId }, {
+
+        const service = await CreateService.findOneAndUpdate({ user_id: req.payload._id, _id: req.params.serviceId }, {
             $pull: {
                 // pull documents from array of objects where publicId is equal to req.body.publicId
                 serviceDocuments: { publicId: req.body.publicId }
@@ -294,7 +313,7 @@ const deleteServiceDocumentData = async (req, res) => {
 
 const getAllTalentServices = async (req, res) => {
     try {
-        const services = await CreateService.find({ user_id: req.payload.userData._id })
+        const services = await CreateService.find({ user_id: req.payload._id })
         if (!services) {
             return res.status(400).json({ success: false, message: 'services not found' })
         }
@@ -306,7 +325,8 @@ const getAllTalentServices = async (req, res) => {
 
 const deleteOneService = async (req, res) => {
     try {
-        const service = await CreateService.findOneAndDelete({ user_id: req.payload.userData._id, _id: req.params.serviceId })
+        const service = await CreateService.findOneAndDelete({ user_id: req.payload._id, _id: req.params.serviceId });
+
         if (!service) {
             return res.status(400).json({ success: false, message: 'service not found' })
         }
@@ -315,12 +335,26 @@ const deleteOneService = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message })
     }
 }
+const getServiceById = async (req, res) => {
+    try {
+        const service = await CreateService.findOne({ user_id: req.payload._id, _id: req.params.serviceId }).populate('user_id')
+        if (!service) {
+            return res.status(400).json({ success: false, message: 'service not found' })
+        }
+        return res.status(200).json(service)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ success: false, message: error.message })
+
+    }
+}
+
 
 
 // TODO: accoutSettingsController NotifcationController OrderDeliveryController
 
 module.exports = {
-
+    getServiceById,
     createServiceStepOne,
     createServiceStepTwo,
     createServiceStepThree,
@@ -332,6 +366,8 @@ module.exports = {
     updateServiceStepOne,
 
 }
+
+
 
 
 

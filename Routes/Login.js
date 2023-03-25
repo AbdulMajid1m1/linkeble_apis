@@ -7,6 +7,6 @@ router.post('/signIn', SignIn)
 router.post('/forget-password/send-email', forgetPasswordStepOne)
 router.post('/forget-password/verify-code', forgetPasswordStepTwo)
 router.post('/forget-password/reset-password', resetPassword)
-router.post('/logout', auth, logout)
+router.post('/logout', logout)
 module.exports = router
 
