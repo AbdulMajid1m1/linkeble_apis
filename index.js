@@ -2,9 +2,6 @@
 const express = require('express')
 const app = express()
 
-
-
-
 // error handling middleware 
 const PORT = process.env.PORT || 5000
 require('dotenv').config()

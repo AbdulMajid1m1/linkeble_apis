@@ -8,6 +8,7 @@ const { createServiceStepOne, createServiceStepTwo,
     deleteOneService,
     updateServiceStepOne,
     getServiceById,
+    updateAllServices,
 } = require('../Controllers/Talent/Talent')
 const { auth } = require('../Middlewares/auth')
 const route = express.Router()

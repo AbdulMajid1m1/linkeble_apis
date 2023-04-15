@@ -47,6 +47,7 @@ const CreateServiceSchema = new mongoose.Schema(
         },
         serviceStatus: { type: String, default: 'pending' },
         sales: { type: Number, default: 0 },
+        rating: { type: Number, default: 0 },
 
         // comments and reviews
         //  [{img:str,pid:str}]

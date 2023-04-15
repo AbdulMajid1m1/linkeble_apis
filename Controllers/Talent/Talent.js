@@ -24,6 +24,7 @@ const createServiceStepOne = async (req, res) => {
         return res.status(400).json({ success: false, message: value.error.details[0].message })
     }
     const { title, description, category, subcategory, serviceTags } = req.body;
+    console.log("check userId" + " " + req.payload._id)
     const ifServiceExit = await CreateService.find({ user_id: req.payload._id })
     console.log(ifServiceExit.length)
     if (ifServiceExit.length < 7) {
@@ -313,6 +314,7 @@ const deleteServiceDocumentData = async (req, res) => {
 
 const getAllTalentServices = async (req, res) => {
     try {
+        console.log(req.payload)
         const services = await CreateService.find({ user_id: req.payload._id })
         if (!services) {
             return res.status(400).json({ success: false, message: 'services not found' })
@@ -348,6 +350,7 @@ const getServiceById = async (req, res) => {
 
     }
 }
+
 
 
 
