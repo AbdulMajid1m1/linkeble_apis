@@ -8,7 +8,7 @@ const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
 const { Chatlist, GroupChatList } = require('../Models/Chatlist');
 const createError = require('../Utils/createError');
-
+const isProduction = true;
 const SignUp = async (req, res, next) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
@@ -61,6 +61,8 @@ const SignUp = async (req, res, next) => {
             delete createdUser.password
             return res.cookie("accessToken", token, {
                 httpOnly: true,
+                secure: isProduction, // Set 'secure' to true only in production
+                sameSite: isProduction ? "none" : "lax", // Set 'sameSite' to 'none' only in production
             }).status(200).json({ success: true, userData: createdUser, token: token })
 
         }
@@ -93,11 +95,14 @@ const SignIn = async (req, res, next) => {
                 const token = jwt.sign(userData, jwtKey, { expiresIn: '30d' })
                 res.cookie("accessToken", token, {
                     httpOnly: true,
+                    secure: isProduction, // Set 'secure' to true only in production
+                    sameSite: isProduction ? "none" : "lax", // Set 'sameSite' to 'none' only in production
+
                 }).status(200).json({
                     success: true, message: "Login Successful",
                     userData: user,
                     token
-                }) 
+                })
             }
             else {
                 next(createError(400, "Wrong credentials!"))
