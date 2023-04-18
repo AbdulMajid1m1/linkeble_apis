@@ -12,7 +12,25 @@ const fileUpload = require('express-fileupload')
 const dbConnect = require('./Config/mongo')
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://linkeble-2f2f5.web.app",
+];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // If the origin is not in the allowedOrigins list or it's not provided, block the request
+            if (!origin || !allowedOrigins.includes(origin)) {
+                return callback(new Error("Not allowed by CORS"), false);
+            }
+            // If the origin is allowed, proceed with the request
+            return callback(null, true);
+        },
+        credentials: true,
+    })
+);
+
 
 app.use(
     fileUpload({
