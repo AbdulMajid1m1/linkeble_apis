@@ -337,9 +337,22 @@ const deleteOneService = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message })
     }
 }
-const getServiceById = async (req, res) => {
+const getTalentOwnServiceById = async (req, res) => {
     try {
         const service = await CreateService.findOne({ user_id: req.payload._id, _id: req.params.serviceId }).populate('user_id')
+        if (!service) {
+            return res.status(400).json({ success: false, message: 'service not found' })
+        }
+        return res.status(200).json(service)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ success: false, message: error.message })
+
+    }
+}
+const getServiceDetails = async (req, res) => {
+    try {
+        const service = await CreateService.findOne({ _id: req.params.serviceId }).populate('user_id')
         if (!service) {
             return res.status(400).json({ success: false, message: 'service not found' })
         }
@@ -354,10 +367,12 @@ const getServiceById = async (req, res) => {
 
 
 
+
 // TODO: accoutSettingsController NotifcationController OrderDeliveryController
 
 module.exports = {
-    getServiceById,
+    getTalentOwnServiceById,
+    getServiceDetails,
     createServiceStepOne,
     createServiceStepTwo,
     createServiceStepThree,

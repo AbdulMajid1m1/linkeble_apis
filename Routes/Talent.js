@@ -7,8 +7,9 @@ const { createServiceStepOne, createServiceStepTwo,
     getAllTalentServices,
     deleteOneService,
     updateServiceStepOne,
-    getServiceById,
     updateAllServices,
+    getTalentOwnServiceById,
+    getServiceDetails,
 } = require('../Controllers/Talent/Talent')
 const { auth } = require('../Middlewares/auth')
 const route = express.Router()
@@ -21,7 +22,11 @@ route.post("/create-service/step-four/:serviceId", auth, createServiceStepFour)
 route.delete("/delete-service-gallery-data/:serviceId", auth, deleteServiceGalleryData)
 route.delete("/delete-service-document-data/:serviceId", auth, deleteServiceDocumentData)
 route.get("/get-services-data", auth, getAllTalentServices)
-route.get("/get-single-service/:serviceId", auth, getServiceById)
+route.get("/get-single-service/:serviceId", auth, getTalentOwnServiceById)
 route.delete("/delete-service/:serviceId", auth, deleteOneService)
+
+// buyer  routes
+route.get("/get-service-details/:serviceId", auth, getServiceDetails)
+
 
 module.exports = route
