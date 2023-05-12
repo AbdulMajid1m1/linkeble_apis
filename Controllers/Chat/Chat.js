@@ -6,6 +6,8 @@ const addToChatlist = async (req, res) => {
     // get user id from payload and chat id from payload
     const userId = req.payload._id;
     const chatId = req.payload.chatlistId;
+    console.log(userId, chatId)
+    console.log(req.payload)
     const value = Joi.object({
         chatWith: Joi.string().required()
     }).validate(req.body)
@@ -14,6 +16,7 @@ const addToChatlist = async (req, res) => {
     }
 
     const { chatWith } = req.body;
+    console.log(chatWith)
     try {
         // const ifUserExit = await Chatlist.findOne({ usersList: { $in: [chatWith] } })
         // const ifUserExit = await Chatlist.findOne({ _id: chatId }, { usersList: { $in: [chatWith] } })
@@ -80,7 +83,6 @@ const getChatlist = async (req, res) => {
         if (!chatlistObj) {
             console.log("Chatlist not found");
         }
-        console.log(chatlistObj);
         const chatlist = chatlistObj.usersList || [];
 
         const groupChatlistObj = await GroupChatList.findById(req.payload.groupChatListId).populate('groupChatList');
@@ -96,13 +98,12 @@ const getChatlist = async (req, res) => {
                     { senderId: user._id, receiverId: req.payload._id }]
                 }).sort({ createdAt: -1 }).limit(1);
 
-            user.lastMessage = lastMessage;
-            return user;
+            return { ...user._doc, lastMessage };
         });
 
         const ChatListWithLastMsg = await Promise.all(chatListPromises);
         const sortedChatList = ChatListWithLastMsg.sort((a, b) => {
-            return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+            return new Date(b.lastMessage[0].createdAt) - new Date(a.lastMessage[0].createdAt);
         });
 
         const groupChatListPromises = groupChatlist.map(async group => {
@@ -111,13 +112,12 @@ const getChatlist = async (req, res) => {
                     groupChat: group._id
                 }
             ).sort({ createdAt: -1 }).limit(1);
-            group.lastMessage = lastMessage;
-            return group;
+            return { ...group._doc, lastMessage };
         });
 
         const groupChatListWithLastMsg = await Promise.all(groupChatListPromises);
         const sortedGroupChatList = groupChatListWithLastMsg.sort((a, b) => {
-            return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+            return new Date(b.lastMessage[0].createdAt) - new Date(a.lastMessage[0].createdAt);
         });
 
         return res.status(200).json({ message: "Chatlist", data: { chatlist: sortedChatList, groupChatlist: sortedGroupChatList } });
@@ -127,6 +127,8 @@ const getChatlist = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 }
+
+
 
 
 module.exports = {

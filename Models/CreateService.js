@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const CreateServiceSchema = new mongoose.Schema(
     {
-        user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         title: String,
         description: String,
         category: String,

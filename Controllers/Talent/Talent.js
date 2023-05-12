@@ -314,8 +314,9 @@ const deleteServiceDocumentData = async (req, res) => {
 
 const getAllTalentServices = async (req, res) => {
     try {
-        console.log(req.payload)
+        // console.log(req.payload)
         const services = await CreateService.find({ user_id: req.payload._id })
+        console.log(services)
         if (!services) {
             return res.status(400).json({ success: false, message: 'services not found' })
         }

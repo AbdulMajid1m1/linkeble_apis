@@ -49,12 +49,23 @@ const SignUp = async (req, res, next) => {
                 username,
                 chatlistId: chatList._id,
                 groupChatListId: groupChatList._id
-            })
-            console.log(newUser)
+            });
 
-            const userTokenData = newUser;
-            delete userTokenData.password;
-            const token = jwt.sign({ userData: userTokenData }, jwtKey, { expiresIn: '30d' })
+            const userTokenData = {
+                _id: newUser._id,
+                email: newUser.email,
+                username: newUser.username,
+                profileImg: newUser.profileImg,
+                location: newUser.location,
+                status: newUser.status,
+                chatlistId: newUser.chatlistId,
+                groupChatListId: newUser.groupChatListId,
+                favouriteGigs: newUser.favouriteGigs,
+                createdAt: newUser.createdAt,
+                updatedAt: newUser.updatedAt
+            };
+            const token = jwt.sign(userTokenData, jwtKey, { expiresIn: '30d' });
+
             // newUser.token = token;
             // console.log(userTokenData)
             const createdUser = await newUser.save()
@@ -90,9 +101,21 @@ const SignIn = async (req, res, next) => {
         if (user) {
             const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
             if (isPasswordCorrect) {
-                const userData = user.toObject();
-                delete userData.password;
-                const token = jwt.sign(userData, jwtKey, { expiresIn: '30d' })
+                const userData = {
+                    _id: user._id,
+                    email: user.email,
+                    username: user.username,
+                    profileImg: user.profileImg,
+                    location: user.location,
+                    status: user.status,
+                    chatlistId: user.chatlistId,
+                    groupChatListId: user.groupChatListId,
+                    favouriteGigs: user.favouriteGigs,
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt
+                };
+                const token = jwt.sign(userData, jwtKey, { expiresIn: '30d' });
+
                 res.cookie("accessToken", token, {
                     httpOnly: true,
                     secure: isProduction, // Set 'secure' to true only in production
