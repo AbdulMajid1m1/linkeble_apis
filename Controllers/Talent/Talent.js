@@ -25,6 +25,10 @@ const createServiceStepOne = async (req, res) => {
     }
     const { title, description, category, subcategory, serviceTags } = req.body;
     console.log("check userId" + " " + req.payload._id)
+    if (req.payload._id == undefined) {
+        return res.status(400).json({ success: false, message: "user id not found" })
+    }
+
     const ifServiceExit = await CreateService.find({ user_id: req.payload._id })
     console.log(ifServiceExit.length)
     if (ifServiceExit.length < 7) {
