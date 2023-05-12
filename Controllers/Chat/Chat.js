@@ -103,8 +103,12 @@ const getChatlist = async (req, res) => {
 
         const ChatListWithLastMsg = await Promise.all(chatListPromises);
         const sortedChatList = ChatListWithLastMsg.sort((a, b) => {
+            if (!a.lastMessage[0] || !b.lastMessage[0]) {
+                return 0; // or some other default value
+            }
             return new Date(b.lastMessage[0].createdAt) - new Date(a.lastMessage[0].createdAt);
         });
+
 
         const groupChatListPromises = groupChatlist.map(async group => {
             const lastMessage = await Message.find(

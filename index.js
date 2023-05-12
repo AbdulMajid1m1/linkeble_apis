@@ -11,6 +11,7 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const dbConnect = require('./Config/mongo');
 const cookieParser = require('cookie-parser');
+const { sendMessage } = require('./Controllers/Chat/Message');
 
 app.use(cookieParser());
 
@@ -27,6 +28,9 @@ const io = new Server(server, {
         credentials: true,
     },
 });
+
+// export the io object so that it can be used in the root route
+module.exports.io = io;
 
 app.use(
     cors({
@@ -51,23 +55,41 @@ app.use(
 
 app.use('/', require('./Routes/RootRoute'));
 
-// Set up a basic WebSocket connection with the frontend
+// Set up a WebSocket connection with the frontend
+// io.on('connection', (socket) => {
+//     console.log('New WebSocket connection');
+
+//     // Listen for chatMessage event from client
+//     socket.on('chatMessage', (message, callback) => {
+//       // Import sendMessage from route file
+
+//       // Call sendMessage
+//       sendMessage(message, (response) => {
+//         // Emit event to client with the message status
+//         if (response.success) {
+//           io.emit('message', response.message); // Emit the saved message to all clients
+//         }
+//         if (callback && typeof callback === "function") {
+//           callback(response);
+//         }
+//       });
+//     });
+//   });
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('New WebSocket connection');
 
-    // Listen for chat messages from the frontend
-    socket.on('chat message', (msg) => {
-        console.log('message: ' + msg);
-
-        // Broadcast the received message to all connected clients
-        io.emit('chat message', msg);
-    });
-
-    // Log when a user disconnects
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
+    socket.on('chatMessage', (message, callback) => {
+        sendMessage(message, (response) => {
+            if (response.success) {
+                io.emit('message', response.message);
+            }
+            if (callback && typeof callback === "function") {
+                callback(response);
+            }
+        });
     });
 });
+
 
 app.get('/error', (req, res, next) => {
     const err = new Error('This is an error');
@@ -93,5 +115,3 @@ server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-
-// uzair chutyia ha
