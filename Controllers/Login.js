@@ -8,7 +8,7 @@ const User = require('../Models/User');
 const sendOTPEmail = require('./Email/sendOTPEmal');
 const { Chatlist, GroupChatList } = require('../Models/Chatlist');
 const createError = require('../Utils/createError');
-const isProduction = true;
+const isProduction = true; // for production make it true
 const SignUp = async (req, res, next) => {
     const value = Joi.object({
         email: Joi.string().email().required(),
