@@ -35,12 +35,9 @@ const placeOrder = async (req, res) => {
     const orderData = {
         title,
         details,
-
         paymentIntentId,
         paymentStatus: true,
-
     }
-
     if (uploadAttachments.length > 0) {
         orderData.attachments = uploadAttachments
     }

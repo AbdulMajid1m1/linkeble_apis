@@ -28,7 +28,6 @@ const sendOffer = async (req, res) => {
             deliveryTime,
             offerExpireIn,
             paymentMethod,
-
         })
         const result = await offer.save()
         if (!result) {
@@ -53,7 +52,6 @@ const getOffers = async (req, res) => {
     if (value.error) {
         return res.status(400).json({ success: false, error: value.error.details[0].message })
     }
-
     try {
         const { to } = req.query
         const offers = await Offer.find({
@@ -74,7 +72,6 @@ const getOffers = async (req, res) => {
         return res.status(500).json({ success: false, error: err.message })
     }
 }
-
 const acceptOffer = async (req, res) => {
     const value = Joi.object({
         offerId: Joi.string().required(),
