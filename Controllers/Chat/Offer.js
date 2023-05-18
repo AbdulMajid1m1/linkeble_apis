@@ -9,25 +9,26 @@ const sendOffer = async (req, res) => {
         deliveryTime: Joi.date().required(),
         offerExpireIn: Joi.date(),
         serviceId: Joi.string().required(),
-        paymentMethod: Joi.string().valid('oneTime', milstone).insensitive().required(),
     }).validate(req.body)
     if (value.error) {
-        return res.status(400).send(value.error.details[0].message)
+        return res.status(400).send({
+           error:  value.error.details[0].message,
+            message: "errrrrorrrr"
+        })
     }
     try {
 
-        receiverId = req.query.recieverId;// recieverId is the id of the user to whom the offer is to be sent
-        const { description, price, revision, deliveryTime, offerExpireIn, serviceId, paymentMethod } = req.body
+        // recieverId is the id of the user to whom the offer is to be sent
+        const { description, price, revision, deliveryTime, offerExpireIn, serviceId } = req.body
         const offer = new Offer({
             sender: req.payload.userData._id,
-            receiver: receiverId,
+            receiver: "64594885bce07ea69021228a",
             serviceId,
             description,
             price,
             revision,
             deliveryTime,
             offerExpireIn,
-            paymentMethod,
         })
         const result = await offer.save()
         if (!result) {
@@ -37,7 +38,7 @@ const sendOffer = async (req, res) => {
         return res.status(200).json({ success: true, message: "Offer sent successfully" })
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message })
+        return res.status(500).json({ success: false, error: "message" })
     }
 }
 
@@ -116,6 +117,5 @@ const requestModification = async (req, res) => {
         return res.status(500).json({ success: false, error: err.message })
     }
 }
-
 
 module.exports = { sendOffer, getOffers, acceptOffer, requestModification }

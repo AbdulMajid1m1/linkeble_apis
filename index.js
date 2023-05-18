@@ -53,6 +53,8 @@ app.use(
     })
 );
 
+const SendOffer = require('./Routes/sendOffer');
+
 app.use('/', require('./Routes/RootRoute'));
 
 // Set up a WebSocket connection with the frontend
@@ -109,6 +111,9 @@ app.use((err, req, res, next) => {
 
     return res.status(errorStatus).json({ success: false, error: errorMessage });
 });
+
+app.use(SendOffer);
+
 
 // Change app.listen to server.listen
 server.listen(PORT, () => {
